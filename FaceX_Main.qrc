@@ -1,0 +1,13 @@
+<RCC>
+    <qresource>
+        <file>FaceX_Main.qmlproject</file>
+        <file>FaceX_Main/Constants.qml</file>
+        <file>FaceX_Main/EventListModel.qml</file>
+        <file>FaceX_Main/EventListSimulator.qml</file>
+        <file>FaceX_Main/qmldir</file>
+        <file>FaceX_MainContent/App.qml</file>
+        <file>FaceX_MainContent/main.qml</file>
+        <file>FaceX_MainContent/Screen01.qml</file>
+        <file>qtquickcontrols2.conf</file>
+    </qresource>
+</RCC>
