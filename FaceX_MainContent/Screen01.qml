@@ -122,8 +122,8 @@ Item {
             Layout.preferredHeight: 30
 
             RowLayout {
-                spacing: 1
-                Text { text: "FACE -"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 18 }
+                spacing: 10
+                Text { text: "FACE-X"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 18 }
                 Image {
                     id: imgLogo
                     Layout.preferredWidth: 24
@@ -131,8 +131,7 @@ Item {
                     fillMode: Image.PreserveAspectFit
                     source: "Logo.png"
                 }
-
-                Text { text: "CENTRAL DE VERIFICAÇÃO"; color: "#8674CC"; font.bold: true; font.pixelSize: 12; Layout.leftMargin: 20 }
+                Text { text: "CENTRAL DE VERIFICAÇÃO"; color: "#8674CC"; font.bold: true; font.pixelSize: 12 }
             }
 
             Item { Layout.fillWidth: true } // Espaçador empurra o resto pra direita
