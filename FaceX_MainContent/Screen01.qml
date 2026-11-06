@@ -1,24 +1,23 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
-import Qt5Compat.GraphicalEffects
+import Qt5Compat.GraphicalEffects // Coisas de gráfico bonitinho (o efeito de blur)
 
 Item {
     id: root
-    anchors.fill: parent
+    anchors.fill: parent // Ocupa a tela inteira
 
-    // Fundo Escuro Base da Tela
+    // === FUNDO BONITO (Tudo pra deixar o fundo escuro e embaçado) ===
     Rectangle {
         anchors.fill: parent
-        color: "#0B101D"
+        color: "#0B101D" // Cor escura base se a imagem falhar
         z: 0
     }
 
-    // Imagem de Fundo Com Desfoque (Blur)
     Image {
         id: bgImageSource
         anchors.fill: parent
-        source: "background.jpg"
+        source: "https://www.espacohausimoveis.com.br/blog/wp-content/uploads/2024/05/53439242167_0bcfe4efd5_k.jpg" // Imagem de fundo escondida só pra alimentar o blur
         fillMode: Image.PreserveAspectCrop
         visible: false
     }
@@ -27,20 +26,19 @@ Item {
         id: bgBlur
         anchors.fill: parent
         source: bgImageSource
-        radius: 30
+        radius: 30 // O tanto que vai embaçar a imagem
         cached: true
         z: 1
     }
 
-    // Overlay Semi-transparente Escuro
     Rectangle {
         anchors.fill: parent
         color: "#0B101D"
-        opacity: 0.85
+        opacity: 0.85 // Camada escura por cima do blur pra não doer o olho
         z: 2
     }
 
-    // Propriedades da Ocorrência Ativa Selecionada
+    // === DADOS DA TELA PRINCIPAL (Pega do item selecionado da lista) ===
     property int indexOcorrenciaSelecionada: 0
     property string idOcorrenciaAtiva: modeloOcorrencias.count > 0 ? modeloOcorrencias.get(indexOcorrenciaSelecionada).idOcorrencia : "-"
     property string nomeProcurado: modeloOcorrencias.count > 0 ? modeloOcorrencias.get(indexOcorrenciaSelecionada).nome : "Nenhuma ocorrência"
@@ -53,7 +51,7 @@ Item {
     property string cameraDetectada: modeloOcorrencias.count > 0 ? modeloOcorrencias.get(indexOcorrenciaSelecionada).cam : "-"
     property string ocorrenciaStatus: modeloOcorrencias.count > 0 ? modeloOcorrencias.get(indexOcorrenciaSelecionada).status : "-"
 
-    // Modelos de Dados
+    // === BANCO DE DADOS DE MENTIRA (Mockups pra testar na tela) ===
     ListModel {
         id: modeloOcorrencias
         ListElement {
@@ -87,14 +85,14 @@ Item {
         ListElement { idOcorrencia: "30"; dataHora: "16/10/2026 18:48:56"; pessoa: "Gabriel Ferro"; camera: "CAM-001"; similaridade: "82.47%"; status: "CONFIRMED" }
     }
 
-    // Funções de ação das ocorrências
+    // === LÓGICA DE CONFIRMAR / DESCARTAR ===
     function responderOcorrencia(novoStatus) {
-        if (modeloOcorrencias.count === 0) return
+        if (modeloOcorrencias.count === 0) return // Sem ocorrência? Faz nada.
 
         var itemAtual = modeloOcorrencias.get(root.indexOcorrenciaSelecionada)
         var numId = itemAtual.idOcorrencia.replace("ID ", "")
 
-        // Adiciona ao Histórico
+        // Joga pro histórico
         modeloHistorico.insert(0, {
             idOcorrencia: numId,
             dataHora: itemAtual.dataHora,
@@ -104,28 +102,28 @@ Item {
             status: novoStatus
         })
 
-        // Remove das ocorrências ativas
+        // Tira da lista da tela principal
         modeloOcorrencias.remove(root.indexOcorrenciaSelecionada)
         if (root.indexOcorrenciaSelecionada >= modeloOcorrencias.count) {
             root.indexOcorrenciaSelecionada = Math.max(0, modeloOcorrencias.count - 1)
         }
     }
 
-    // ESTRUTURA DA TELA PRINCIPAL
+    // === LAYOUT PRINCIPAL (O que aparece na tela sem modais) ===
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 14
         spacing: 10
         z: 3
 
-        // Cabeçalho Superior
+        // Topo da tela (Logo e título)
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 30
 
             RowLayout {
-                spacing: 10
-                Text { text: "FACE-X"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 18 }
+                spacing: 1
+                Text { text: "FACE -"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 18 }
                 Image {
                     id: imgLogo
                     Layout.preferredWidth: 24
@@ -133,10 +131,11 @@ Item {
                     fillMode: Image.PreserveAspectFit
                     source: "Logo.png"
                 }
-                Text { text: "CENTRAL DE VERIFICAÇÃO"; color: "#8674CC"; font.bold: true; font.pixelSize: 12 }
+
+                Text { text: "CENTRAL DE VERIFICAÇÃO"; color: "#8674CC"; font.bold: true; font.pixelSize: 12; Layout.leftMargin: 20 }
             }
 
-            Item { Layout.fillWidth: true }
+            Item { Layout.fillWidth: true } // Espaçador empurra o resto pra direita
 
             Text {
                 text: modeloOcorrencias.count + " ocorrência(s) ativa(s)"
@@ -145,13 +144,13 @@ Item {
             }
         }
 
-        // Layout Central
+        // Meio da tela (Lista na esquerda, Detalhes na direita)
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 12
 
-            // Painel Esquerdo (Lista Ocorrências Ativas)
+            // Lista lateral das ocorrências rolando agora
             Rectangle {
                 Layout.preferredWidth: 280
                 Layout.fillHeight: true
@@ -182,7 +181,7 @@ Item {
                             delegate: Rectangle {
                                 width: listOcorrencias.width
                                 height: 28
-                                color: root.indexOcorrenciaSelecionada === index ? "#38BDF8" : "#1C2541"
+                                color: root.indexOcorrenciaSelecionada === index ? "#38BDF8" : "#1C2541" // Destaca se tiver selecionado
 
                                 RowLayout {
                                     anchors.fill: parent
@@ -200,7 +199,7 @@ Item {
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: root.indexOcorrenciaSelecionada = index
+                                    onClicked: root.indexOcorrenciaSelecionada = index // Clica pra ver os detalhes no lado
                                 }
                             }
                         }
@@ -208,7 +207,7 @@ Item {
                 }
             }
 
-            // Painel Direito (Visualização Imagens + Informações)
+            // Quadrados de visualização de foto e textos do procurado
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -219,6 +218,7 @@ Item {
                     Layout.fillHeight: true
                     spacing: 12
 
+                    // Foto de referência
                     Rectangle {
                         Layout.fillWidth: true; Layout.fillHeight: true
                         color: "#131B2E"; radius: 4; border.color: "#1E293B"
@@ -232,6 +232,7 @@ Item {
                         }
                     }
 
+                    // Foto pega pela câmera
                     Rectangle {
                         Layout.fillWidth: true; Layout.fillHeight: true
                         color: "#131B2E"; radius: 4; border.color: "#1E293B"
@@ -246,6 +247,7 @@ Item {
                     }
                 }
 
+                // Bloco das informações escritas
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 185
@@ -260,6 +262,7 @@ Item {
 
                         Text { text: "INFORMAÇÕES DO PROCURADO"; color: "#E2E8F0"; font.bold: true; font.pixelSize: 12 }
 
+                        // Tabela com os textos formatados
                         GridLayout {
                             columns: 4
                             rowSpacing: 4; columnSpacing: 20
@@ -295,15 +298,15 @@ Item {
 
                         Item { Layout.fillHeight: true }
 
+                        // Botões de ação da ocorrência
                         RowLayout {
                             spacing: 10
 
-                            // BOTÃO CONFIRMAR CONFIGURADO
                             Rectangle {
                                 Layout.preferredWidth: 110
                                 Layout.preferredHeight: 30
                                 radius: 2
-                                color: modeloOcorrencias.count > 0 ? "#2DD4BF" : "#475569"
+                                color: modeloOcorrencias.count > 0 ? "#2DD4BF" : "#475569" // Fica cinza se não tiver nada pra clicar
                                 Text { anchors.centerIn: parent; text: "CONFIRMAR"; color: "#0F172A"; font.bold: true; font.pixelSize: 11 }
                                 MouseArea {
                                     anchors.fill: parent
@@ -312,7 +315,6 @@ Item {
                                 }
                             }
 
-                            // BOTÃO DESCARTAR CONFIGURADO
                             Rectangle {
                                 Layout.preferredWidth: 110
                                 Layout.preferredHeight: 30
@@ -331,7 +333,7 @@ Item {
             }
         }
 
-        // Barra Inferior de Navegação
+        // Rodapé da tela com os botões de abrir as janelas/modais
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 34
@@ -346,7 +348,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: modalHistorico.visible = true
+                    onClicked: modalHistorico.visible = true // Abre a modal do histórico
                 }
             }
 
@@ -356,7 +358,7 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: modalGerenciar.visible = true
+                    onClicked: modalGerenciar.visible = true // Abre a modal de cadastro
                 }
             }
 
@@ -366,23 +368,23 @@ Item {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: modalAdicionar.visible = true
+                    onClicked: modalAdicionar.visible = true // Abre a modal de adicionar
                 }
             }
         }
     }
 
     // =========================================================
-    // MODAL 1: ADICIONAR SUSPEITO
+    // MODAL 1: ADICIONAR SUSPEITO (Janela pop-up 1)
     // =========================================================
     Rectangle {
         id: modalAdicionar
         anchors.fill: parent
-        color: "#B0000000"
+        color: "#B0000000" // Fundo escuro cobrindo a tela toda
         visible: false
-        z: 9999
+        z: 9999 // Garante que fica por cima de tudo
 
-        MouseArea { anchors.fill: parent }
+        MouseArea { anchors.fill: parent } // Bloqueia cliques no fundo
 
         Rectangle {
             width: 480
@@ -414,6 +416,7 @@ Item {
                     Text { text: "Preencha os dados e selecione uma foto frontal nítida."; color: "#94A3B8"; font.pixelSize: 11; Layout.alignment: Qt.AlignHCenter }
                 }
 
+                // Form de cadastro
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 10
@@ -478,6 +481,7 @@ Item {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
+                                // Pega o que digitou ou põe valor padrão e salva na lista
                                 var nomeCad = addNome.text !== "" ? addNome.text : "Novo Suspeito"
                                 var idadeCad = addIdade.text !== "" ? addIdade.text : "20"
                                 var idNovo = (modeloCadastrados.count + 1).toString()
@@ -491,6 +495,7 @@ Item {
                                     descricao: addDescricao.text
                                 })
 
+                                // Limpa tudo e fecha
                                 addNome.text = ""
                                 addIdade.text = ""
                                 addDescricao.text = ""
@@ -505,292 +510,294 @@ Item {
     }
 
     // =========================================================
-        // MODAL 2: GERENCIAR CADASTRADOS (REDIMENSIONADO)
-        // =========================================================
+    // MODAL 2: GERENCIAR CADASTRADOS (Janela pop-up 2)
+    // =========================================================
+    Rectangle {
+        id: modalGerenciar
+        anchors.fill: parent
+        color: "#B0000000"
+        visible: false
+        z: 9999
+
+        property int indiceSelecionado: -1
+
+        // Filtra a tabela de cadastrados conforme o ComboBox
+        function aplicarFiltro() {
+            modeloFiltrado.clear()
+            var filtro = comboFiltro.currentText
+            for (var i = 0; i < modeloCadastrados.count; i++) {
+                var item = modeloCadastrados.get(i)
+                if (filtro === "TODOS" || item.situacao === filtro) {
+                    modeloFiltrado.append({
+                        idCad: item.idCad,
+                        nome: item.nome,
+                        idade: item.idade,
+                        situacao: item.situacao,
+                        cadastro: item.cadastro,
+                        descricao: item.descricao,
+                        indexOriginal: i
+                    })
+                }
+            }
+            modalGerenciar.indiceSelecionado = -1
+        }
+
+        onVisibleChanged: {
+            if (visible) aplicarFiltro()
+        }
+
+        MouseArea { anchors.fill: parent }
+
         Rectangle {
-            id: modalGerenciar
-            anchors.fill: parent
-            color: "#B0000000"
-            visible: false
-            z: 9999
+            width: 1080
+            height: 580
+            anchors.centerIn: parent
+            color: "#0B101D"
+            border.color: "#1E293B"
+            border.width: 1
+            radius: 6
 
-            property int indiceSelecionado: -1
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 12
 
-            function aplicarFiltro() {
-                modeloFiltrado.clear()
-                var filtro = comboFiltro.currentText
-                for (var i = 0; i < modeloCadastrados.count; i++) {
-                    var item = modeloCadastrados.get(i)
-                    if (filtro === "TODOS" || item.situacao === filtro) {
-                        modeloFiltrado.append({
-                            idCad: item.idCad,
-                            nome: item.nome,
-                            idade: item.idade,
-                            situacao: item.situacao,
-                            cadastro: item.cadastro,
-                            descricao: item.descricao,
-                            indexOriginal: i
-                        })
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text { text: "X-Face — Gerenciar cadastrados"; color: "#94A3B8"; font.pixelSize: 11 }
+                    Item { Layout.fillWidth: true }
+                    Text {
+                        text: "✕"; color: "#94A3B8"; font.pixelSize: 14; font.bold: true
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modalGerenciar.visible = false }
                     }
                 }
-                modalGerenciar.indiceSelecionado = -1
-            }
-
-            onVisibleChanged: {
-                if (visible) aplicarFiltro()
-            }
-
-            MouseArea { anchors.fill: parent }
-
-            Rectangle {
-                width: 1080
-                height: 580
-                anchors.centerIn: parent
-                color: "#0B101D"
-                border.color: "#1E293B"
-                border.width: 1
-                radius: 6
 
                 ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
-                    spacing: 12
+                    spacing: 2
+                    Text { text: "GERENCIAR CADASTRADOS"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 16 }
+                    Text { text: "Edite os dados ou desative temporariamente um cadastro do banco de dados."; color: "#64748B"; font.pixelSize: 11 }
+                }
 
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Text { text: "X-Face — Gerenciar cadastrados"; color: "#94A3B8"; font.pixelSize: 11 }
-                        Item { Layout.fillWidth: true }
-                        Text {
-                            text: "✕"; color: "#94A3B8"; font.pixelSize: 14; font.bold: true
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: modalGerenciar.visible = false }
-                        }
-                    }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: 16
 
+                    // Tabela da esquerda (Lista de cadastrados bem espaçada)
                     ColumnLayout {
-                        spacing: 2
-                        Text { text: "GERENCIAR CADASTRADOS"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 16 }
-                        Text { text: "Edite os dados ou desative temporariamente um cadastro do banco de dados."; color: "#64748B"; font.pixelSize: 11 }
-                    }
-
-                    RowLayout {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        spacing: 16
+                        spacing: 8
 
-                        // LADO ESQUERDO: TABELA BRANCA AMPLIADA
-                        ColumnLayout {
+                        Text { text: "PESSOAS CADASTRADAS"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 11 }
+
+                        RowLayout {
+                            spacing: 8
+                            Text { text: "Exibir:"; color: "#94A3B8"; font.pixelSize: 11 }
+                            ComboBox {
+                                id: comboFiltro
+                                Layout.preferredWidth: 140
+                                Layout.preferredHeight: 28
+                                model: ["TODOS", "SUSPEITO", "PROCURADO"]
+                                background: Rectangle { color: "#FFFFFF"; radius: 3 }
+                                onCurrentTextChanged: modalGerenciar.aplicarFiltro()
+                            }
+                        }
+
+                        ListModel { id: modeloFiltrado }
+
+                        Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            spacing: 8
+                            color: "#FFFFFF"
+                            border.color: "#CBD5E1"
+                            radius: 4
 
-                            Text { text: "PESSOAS CADASTRADAS"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 11 }
+                            ColumnLayout {
+                                anchors.fill: parent
+                                spacing: 0
 
-                            RowLayout {
-                                spacing: 8
-                                Text { text: "Exibir:"; color: "#94A3B8"; font.pixelSize: 11 }
-                                ComboBox {
-                                    id: comboFiltro
-                                    Layout.preferredWidth: 140
-                                    Layout.preferredHeight: 28
-                                    model: ["TODOS", "SUSPEITO", "PROCURADO"]
-                                    background: Rectangle { color: "#FFFFFF"; radius: 3 }
-                                    onCurrentTextChanged: modalGerenciar.aplicarFiltro()
+                                // Titulo das colunas
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 34
+                                    color: "#E2E8F0"
+
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 12; anchors.rightMargin: 12
+                                        spacing: 10
+
+                                        Text { text: "ID"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 35 }
+                                        Text { text: "Nome"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
+                                        Text { text: "Idade"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 45 }
+                                        Text { text: "Situação"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 90 }
+                                        Text { text: "Cadastro"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 80 }
+                                    }
                                 }
-                            }
 
-                            ListModel { id: modeloFiltrado }
+                                // Linhas da tabela
+                                ListView {
+                                    id: listCadastrados
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    clip: true
+                                    model: modeloFiltrado
 
-                            Rectangle {
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                color: "#FFFFFF"
-                                border.color: "#CBD5E1"
-                                radius: 4
-
-                                ColumnLayout {
-                                    anchors.fill: parent
-                                    spacing: 0
-
-                                    // CABEÇALHO DA TABELA
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 34
-                                        color: "#E2E8F0"
+                                    delegate: Rectangle {
+                                        width: listCadastrados.width
+                                        height: 36
+                                        color: modalGerenciar.indiceSelecionado === index ? "#38BDF8" : (index % 2 === 0 ? "#FFFFFF" : "#F8FAFC")
 
                                         RowLayout {
                                             anchors.fill: parent
                                             anchors.leftMargin: 12; anchors.rightMargin: 12
                                             spacing: 10
 
-                                            Text { text: "ID"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 35 }
-                                            Text { text: "Nome"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
-                                            Text { text: "Idade"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 45 }
-                                            Text { text: "Situação"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 90 }
-                                            Text { text: "Cadastro"; color: "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.preferredWidth: 80 }
-                                        }
-                                    }
-
-                                    // LISTA DE CADASTRADOS
-                                    ListView {
-                                        id: listCadastrados
-                                        Layout.fillWidth: true
-                                        Layout.fillHeight: true
-                                        clip: true
-                                        model: modeloFiltrado
-
-                                        delegate: Rectangle {
-                                            width: listCadastrados.width
-                                            height: 36
-                                            color: modalGerenciar.indiceSelecionado === index ? "#38BDF8" : (index % 2 === 0 ? "#FFFFFF" : "#F8FAFC")
-
-                                            RowLayout {
-                                                anchors.fill: parent
-                                                anchors.leftMargin: 12; anchors.rightMargin: 12
-                                                spacing: 10
-
-                                                Text { text: model.idCad; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 35 }
-                                                Text { text: model.nome; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
-                                                Text { text: model.idade; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 45 }
-                                                Text { text: model.situacao; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 90 }
-                                                Text {
-                                                    text: model.cadastro
-                                                    color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : (model.cadastro === "ATIVO" ? "#059669" : "#DC2626")
-                                                    font.bold: true
-                                                    font.pixelSize: 11
-                                                    Layout.preferredWidth: 80
-                                                }
+                                            Text { text: model.idCad; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 35 }
+                                            Text { text: model.nome; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.bold: true; font.pixelSize: 11; Layout.fillWidth: true }
+                                            Text { text: model.idade; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 45 }
+                                            Text { text: model.situacao; color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : "#0F172A"; font.pixelSize: 11; Layout.preferredWidth: 90 }
+                                            Text {
+                                                text: model.cadastro
+                                                color: modalGerenciar.indiceSelecionado === index ? "#FFFFFF" : (model.cadastro === "ATIVO" ? "#059669" : "#DC2626")
+                                                font.bold: true
+                                                font.pixelSize: 11
+                                                Layout.preferredWidth: 80
                                             }
+                                        }
 
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: {
-                                                    modalGerenciar.indiceSelecionado = index
-                                                    editNome.text = model.nome
-                                                    editIdade.text = model.idade
-                                                    editSituacao.currentIndex = model.situacao === "SUSPEITO" ? 0 : 1
-                                                    editDescricao.text = model.descricao
-                                                }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                // Preenche os campos da direita ao clicar na linha
+                                                modalGerenciar.indiceSelecionado = index
+                                                editNome.text = model.nome
+                                                editIdade.text = model.idade
+                                                editSituacao.currentIndex = model.situacao === "SUSPEITO" ? 0 : 1
+                                                editDescricao.text = model.descricao
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
 
-                        // LADO DIREITO: FORMULÁRIO ENCOLHIDO (LARGURA RESTRITA)
+                    // Form da direita pra editar o item selecionado
+                    ColumnLayout {
+                        Layout.preferredWidth: 260
+                        Layout.fillHeight: true
+                        spacing: 10
+
+                        Text { text: "DADOS DO CADASTRO"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 11 }
+
                         ColumnLayout {
-                            Layout.preferredWidth: 260
-                            Layout.fillHeight: true
-                            spacing: 10
+                            spacing: 4; Layout.fillWidth: true
+                            Text { text: "Nome completo"; color: "#94A3B8"; font.pixelSize: 10 }
+                            TextField { id: editNome; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
+                        }
 
-                            Text { text: "DADOS DO CADASTRO"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 11 }
+                        ColumnLayout {
+                            spacing: 4; Layout.fillWidth: true
+                            Text { text: "Idade"; color: "#94A3B8"; font.pixelSize: 10 }
+                            TextField { id: editIdade; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
+                        }
 
-                            ColumnLayout {
-                                spacing: 4; Layout.fillWidth: true
-                                Text { text: "Nome completo"; color: "#94A3B8"; font.pixelSize: 10 }
-                                TextField { id: editNome; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
+                        ColumnLayout {
+                            spacing: 4; Layout.fillWidth: true
+                            Text { text: "Situação"; color: "#94A3B8"; font.pixelSize: 10 }
+                            ComboBox {
+                                id: editSituacao
+                                Layout.fillWidth: true; Layout.preferredHeight: 34
+                                model: ["SUSPEITO", "PROCURADO"]
+                                background: Rectangle { color: "#FFFFFF"; radius: 3 }
                             }
+                        }
 
-                            ColumnLayout {
-                                spacing: 4; Layout.fillWidth: true
-                                Text { text: "Idade"; color: "#94A3B8"; font.pixelSize: 10 }
-                                TextField { id: editIdade; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
-                            }
+                        ColumnLayout {
+                            spacing: 4; Layout.fillWidth: true
+                            Text { text: "Descrição / ocorrência associada"; color: "#94A3B8"; font.pixelSize: 10 }
+                            TextField { id: editDescricao; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
+                        }
 
-                            ColumnLayout {
-                                spacing: 4; Layout.fillWidth: true
-                                Text { text: "Situação"; color: "#94A3B8"; font.pixelSize: 10 }
-                                ComboBox {
-                                    id: editSituacao
-                                    Layout.fillWidth: true; Layout.preferredHeight: 34
-                                    model: ["SUSPEITO", "PROCURADO"]
-                                    background: Rectangle { color: "#FFFFFF"; radius: 3 }
-                                }
-                            }
+                        Item { Layout.fillHeight: true }
 
-                            ColumnLayout {
-                                spacing: 4; Layout.fillWidth: true
-                                Text { text: "Descrição / ocorrência associada"; color: "#94A3B8"; font.pixelSize: 10 }
-                                TextField { id: editDescricao; Layout.fillWidth: true; Layout.preferredHeight: 34; color: "#FFFFFF"; font.pixelSize: 11; background: Rectangle { color: "#1C2541"; radius: 3; border.color: "#334155" } }
-                            }
+                        // Botões de salvar, desativar ou excluir
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
 
-                            Item { Layout.fillHeight: true }
+                            Rectangle {
+                                Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#38BDF8"; radius: 3
+                                Text { anchors.centerIn: parent; text: "SALVAR ALTERAÇÕES"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modalGerenciar.indiceSelecionado >= 0) {
+                                            var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
+                                            var indexOrig = itemFiltrado.indexOriginal
 
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 8
+                                            modeloCadastrados.setProperty(indexOrig, "nome", editNome.text)
+                                            modeloCadastrados.setProperty(indexOrig, "idade", editIdade.text)
+                                            modeloCadastrados.setProperty(indexOrig, "situacao", editSituacao.currentText)
+                                            modeloCadastrados.setProperty(indexOrig, "descricao", editDescricao.text)
 
-                                Rectangle {
-                                    Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#38BDF8"; radius: 3
-                                    Text { anchors.centerIn: parent; text: "SALVAR ALTERAÇÕES"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (modalGerenciar.indiceSelecionado >= 0) {
-                                                var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
-                                                var indexOrig = itemFiltrado.indexOriginal
-
-                                                modeloCadastrados.setProperty(indexOrig, "nome", editNome.text)
-                                                modeloCadastrados.setProperty(indexOrig, "idade", editIdade.text)
-                                                modeloCadastrados.setProperty(indexOrig, "situacao", editSituacao.currentText)
-                                                modeloCadastrados.setProperty(indexOrig, "descricao", editDescricao.text)
-
-                                                modalGerenciar.aplicarFiltro()
-                                            }
+                                            modalGerenciar.aplicarFiltro()
                                         }
                                     }
                                 }
+                            }
 
-                                Rectangle {
-                                    Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#2DD4BF"; radius: 3
-                                    Text { anchors.centerIn: parent; text: "DESATIVAR / REATIVAR"; color: "#0F172A"; font.bold: true; font.pixelSize: 10 }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (modalGerenciar.indiceSelecionado >= 0) {
-                                                var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
-                                                var indexOrig = itemFiltrado.indexOriginal
-                                                var novoStatus = itemFiltrado.cadastro === "ATIVO" ? "INATIVO" : "ATIVO"
+                            Rectangle {
+                                Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#2DD4BF"; radius: 3
+                                Text { anchors.centerIn: parent; text: "DESATIVAR / REATIVAR"; color: "#0F172A"; font.bold: true; font.pixelSize: 10 }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modalGerenciar.indiceSelecionado >= 0) {
+                                            var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
+                                            var indexOrig = itemFiltrado.indexOriginal
+                                            var novoStatus = itemFiltrado.cadastro === "ATIVO" ? "INATIVO" : "ATIVO"
 
-                                                modeloCadastrados.setProperty(indexOrig, "cadastro", novoStatus)
-                                                modalGerenciar.aplicarFiltro()
-                                            }
+                                            modeloCadastrados.setProperty(indexOrig, "cadastro", novoStatus)
+                                            modalGerenciar.aplicarFiltro()
                                         }
                                     }
                                 }
+                            }
 
-                                Rectangle {
-                                    Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#EF4444"; radius: 3
-                                    Text { anchors.centerIn: parent; text: "EXCLUIR DEFINITIVAMENTE"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (modalGerenciar.indiceSelecionado >= 0) {
-                                                var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
-                                                var indexOrig = itemFiltrado.indexOriginal
+                            Rectangle {
+                                Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#EF4444"; radius: 3
+                                Text { anchors.centerIn: parent; text: "EXCLUIR DEFINITIVAMENTE"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modalGerenciar.indiceSelecionado >= 0) {
+                                            var itemFiltrado = modeloFiltrado.get(modalGerenciar.indiceSelecionado)
+                                            var indexOrig = itemFiltrado.indexOriginal
 
-                                                modeloCadastrados.remove(indexOrig)
-                                                editNome.text = ""
-                                                editIdade.text = ""
-                                                editDescricao.text = ""
-                                                modalGerenciar.aplicarFiltro()
-                                            }
+                                            modeloCadastrados.remove(indexOrig)
+                                            editNome.text = ""
+                                            editIdade.text = ""
+                                            editDescricao.text = ""
+                                            modalGerenciar.aplicarFiltro()
                                         }
                                     }
                                 }
+                            }
 
-                                Rectangle {
-                                    Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#1E293B"; border.color: "#334155"; radius: 3
-                                    Text { anchors.centerIn: parent; text: "ATUALIZAR LISTA"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: modalGerenciar.aplicarFiltro()
-                                    }
+                            Rectangle {
+                                Layout.fillWidth: true; Layout.preferredHeight: 36; color: "#1E293B"; border.color: "#334155"; radius: 3
+                                Text { anchors.centerIn: parent; text: "ATUALIZAR LISTA"; color: "#FFFFFF"; font.bold: true; font.pixelSize: 10 }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: modalGerenciar.aplicarFiltro()
                                 }
                             }
                         }
@@ -798,9 +805,10 @@ Item {
                 }
             }
         }
+    }
 
     // =========================================================
-    // MODAL 3: HISTÓRICO DE OCORRÊNCIAS
+    // MODAL 3: HISTÓRICO DE OCORRÊNCIAS (Janela pop-up 3)
     // =========================================================
     Rectangle {
         id: modalHistorico
@@ -809,6 +817,7 @@ Item {
         visible: false
         z: 9999
 
+        // Filtra o histórico por status e por nome/câmera pesquisados
         function aplicarFiltroHistorico() {
             modeloHistoricoFiltrado.clear()
             var st = comboStatusHistorico.currentText
@@ -868,6 +877,7 @@ Item {
                     Text { text: "Consulte ocorrências pendentes, confirmadas e descartadas."; color: "#64748B"; font.pixelSize: 11 }
                 }
 
+                // Barra de busca do histórico
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 16
@@ -906,6 +916,7 @@ Item {
 
                 ListModel { id: modeloHistoricoFiltrado }
 
+                // Tabela de registros do histórico
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true

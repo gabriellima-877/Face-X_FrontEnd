@@ -12,6 +12,8 @@ qt6_add_qml_module(FaceX_MainContent
         "App.qml"
         "main.qml"
         "Screen01.qml"
+    RESOURCES
+        "Logo.png"
 )
 
 
