@@ -563,7 +563,7 @@ Item {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "X-Face — Gerenciar cadastrados"; color: "#94A3B8"; font.pixelSize: 11 }
+                    Text { text: "Face-X — Gerenciar cadastrados"; color: "#94A3B8"; font.pixelSize: 11 }
                     Item { Layout.fillWidth: true }
                     Text {
                         text: "✕"; color: "#94A3B8"; font.pixelSize: 14; font.bold: true
